@@ -35,32 +35,6 @@ type Actress = Person & {
 
 // Utilizza un type guard chiamato isActress per assicurarti che la struttura del dato ricevuto sia corretta.
 
-// Crea una funzione getActress che, dato un id, effettua una chiamata a:
-async function getActress(id: number): Promise<Actress | null> {
-
-  try {
-
-    const response = await fetch(`http://localhost:3333/actresses/${id}`)
-    //gestione errore response
-    if (!response.ok) {
-      throw new Error("Errore HTTP" + response.status);
-    }
-
-    const obj: unknown = await response.json()
-
-    if(!isActress(obj)){
-      throw new Error("Formato dei dati non valito");
-    }
-
-    return obj
-  } catch (err) {
-    if(err instanceof Error){
-      console.error(`Errore del serve ${err.message}`)
-    }
-    
-    return null
-  }
-}
 
 //definisco type guard per obj
 function isActress(object: unknown): object is Actress {
@@ -85,10 +59,81 @@ function isActress(object: unknown): object is Actress {
   }
 }
 
-async function risolviPromise() {
-  const risultato = await getActress(1);
-  console.log(risultato);
+
+// Crea una funzione getActress che, dato un id, effettua una chiamata a:
+async function getActress(id: number): Promise<Actress | null> {
+
+  try {
+
+    const response = await fetch(`http://localhost:3333/actresses/${id}`)
+    //gestione errore response
+    if (!response.ok) {
+      throw new Error("Errore HTTP" + response.status);
+    }
+
+    const obj: unknown = await response.json()
+
+    if (!isActress(obj)) {
+      throw new Error("Formato dei dati non valito");
+    }
+
+    return obj
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(`Errore del serve ${err.message}`)
+    }
+
+    return null
+  }
 }
 
-risolviPromise()
+
+/////////////////////////
+// async function risolviPromise() {
+//   const risultato = await getActress(1);
+//   console.log(risultato);
+// }
+
+// risolviPromise()
+
+
+
+// 📌 Milestone 4
+// Crea una funzione getAllActresses che chiama:
+async function getAllActresses(): Promise<Actress[]> {
+  // GET /actresses
+
+  // La funzione deve restituire un array di oggetti Actress.
+
+  // Può essere anche un array vuoto.
+
+  try {
+    const response = await fetch(`http://localhost:3333/actresses`)
+    const obj: unknown = await response.json()
+
+    //Se object non e un arr
+    if (!(obj instanceof Array)) {
+      throw new Error("Formato non valido ");
+    }
+
+    // Controlla che tutti gli elementi siano attrici valide
+    const allValid = obj.every(item => isActress(item))
+
+    //Se allValid non e valido 
+    if (!allValid) {
+      throw new Error("Uno o più elementi non sono validi");
+    }
+
+    //Questo array è sicuro, trattalo come Actress[]
+    return obj as Actress[];
+
+  } catch (err) {
+    //se err e effettivamente un errore allora dammello altrimenti ritoranmi []
+    if (err instanceof Error) {
+      console.error(`Errore del server impossibile recuperare gli attori ${err}`)
+    }
+    return []
+  }
+
+}
 
